@@ -1,0 +1,47 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1, user-scalable=yes">
+
+  <title>bloombox-media demo</title>
+
+  <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+  <link rel="import" href="../bloombox-media.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+  <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+  
+  <script type="text/javascript">var __debug = true;</script>
+  <style is="custom-style" include="demo-pages-shared-styles">  
+  </style>
+</head>
+<body unresolved>
+  <div class="vertical-section-container centered">
+    <h3>Basic href preview example</h3>
+    <demo-snippet class="centered-demo">
+      <template>
+        <bloombox-media partner="mm" href="test.jpg"></bloombox-media>
+      </template>
+    </demo-snippet>
+  </div>
+
+  <div class="vertical-section-container centered">
+    <h3>Basic asset preview example</h3>
+    <demo-snippet class="centered-demo">
+      <template>
+        <bloombox-media partner="mm" asset="test.jpg"></bloombox-media>
+      </template>
+    </demo-snippet>
+  </div>
+
+  <div class="vertical-section-container centered">
+    <h3>Basic upload example</h3>
+    <demo-snippet class="centered-demo">
+      <template>
+        <bloombox-media partner="mm"></bloombox-media>
+      </template>
+    </demo-snippet>
+  </div>
+</body>
+</html>

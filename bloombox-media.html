@@ -1,0 +1,206 @@
+<!--
+`<bloombox-media>` provides a media preview and upload tool for Bloombox product management.
+
+@group Bloombox Elements
+@element bloombox-media
+@demo demo/index.html
+@homepage bloombox.github.io
+-->
+<link rel="import" href="../polymer/polymer.html">
+
+<dom-module id="bloombox-media">
+  <style is="custom-style">
+    :host .bb-media-box {
+      background: #DDD;
+      height: 200px;
+      width: 200px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    :host .bb-media-box-content {
+      width: 175px;
+      height: 175px;
+      position: relative;
+      border: 1px solid #888;
+    }
+
+    :host .bb-media {
+      display: flex;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+    }
+
+    :host .bb-media:hover {
+      opacity: 0.35;
+      cursor: pointer;
+    }
+
+    :host .bb-uploader {
+      background: #888;
+      opacity: 0.8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      cursor: pointer;
+      font-size: 80%;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    :host .bb-uploader.media-hover, :host .bb-uploader:hover {
+      background: #CACACA;
+      opacity: 1.0;
+    }
+  </style>
+
+  <template>
+    <div class="bb-media-box">
+      <div id="mediaContent" class="bb-media-box-content">
+        <div id="uploader" class="bb-uploader">
+          <b>Drop image here<br />Or click to select</b>
+        </div><!-- end div.bb-uploader -->
+        <template is="dom-if" if="[[_src]]">
+          <div class="bb-media">
+            <img alt="{{alt}}" src="[[_src]]" class="bb-media-item" width="175" />
+          </div><!-- end div.bb-media -->
+        </template>
+      </div><!-- end div.bb-media-box-content -->
+    </div><!-- end div.bb-media-box -->
+  </template>
+
+  <script>
+    var BloomboxMediaConfig = {
+      version: "v1",
+      bucket: "bloombox-io.appspot.com",
+      host: "storage.googleapis.com"
+    };
+
+    Polymer.BloomboxMedia = Polymer({
+      is: 'bloombox-media',
+      properties: {
+        _src: {
+          type: String,
+          computed: '_computeImageSrc(partner, asset, href)'
+        },
+
+        partner: {
+          type: String
+        },
+
+        alt: {
+          type: String,
+          value: "Product media"
+        },
+
+        asset: {
+          type: String,
+          value: null
+        },
+
+        href: {
+          type: String,
+          value: null
+        }
+      },
+
+      listeners: {
+        'mediaContent.tap': 'selectFileForUpload'
+      },
+
+      _buildAssetURL: function(partner, asset) {
+        // select an environment
+        var debug = window["__debug"] || this["__debug"] || false,
+            prefix = debug ? "sandbox/" + BloomboxMediaConfig.version
+                           : BloomboxMediaConfig.version,
+            url = "https://" + BloomboxMediaConfig.host + "/" +
+                    [BloomboxMediaConfig.bucket,
+                     prefix, "media", "partners", partner, asset].join("/");
+
+        if (debug)
+          console.log("Built media URL for asset '" + asset + "':", url);
+        return url;
+      },
+
+      _onDragOver: function() {
+        var that = this,
+            debug = window["__debug"] || this["__debug"] || false;
+        return (function(e) {
+          e.preventDefault();
+          if (debug)
+            console.log("Media uploader file drag over:", e);
+        });
+      },
+
+      _onDragEnd: function() {
+        var that = this,
+            debug = window["__debug"] || this["__debug"] || false;
+        return (function(e) {
+          e.preventDefault();
+          if (debug)
+            console.log("Media uploader file drag end:", e);
+        });
+      },
+
+      _onDrop: function() {
+        var that = this,
+            debug = window["__debug"] || this["__debug"] || false;
+        return (function(e) {
+          debugger;
+          var file = e.dataTransfer.files[0],
+              reader = new FileReader();
+
+          reader.onload = that._onLocalFileLoad();
+          reader.readAsDataURL(file);
+          e.preventDefault();
+
+          if (debug)
+            console.log("Media uploader file drop:", e, file);
+        });
+      },
+
+      _onLocalFileLoad: function() {
+        var that = this,
+            debug = window["__debug"] || this["__debug"] || false;
+        return (function(e) {
+          if (debug)
+            console.log("Local media file loaded:", e);
+        });
+      },
+
+      _computeImageSrc: function(partner, asset, href) {
+        if (href !== null) {
+          // we have an explicit media URL
+          return href;
+        } else if (asset !== null && partner !== null) {
+          // we have an asset reference
+          return this._buildAssetURL(partner, asset);
+        }
+      },
+
+      selectFileForUpload: function() {
+        alert("would select file for upload");
+      },
+
+      ready: function() {
+        var debug = window["__debug"] || this["__debug"] || false,
+            mediaContent = this.$.mediaContent;
+        if (debug) console.log("Attaching event listeners for media uploader...");
+
+        mediaContent.ondragover = this._onDragOver();
+        mediaContent.ondragend = this._onDragEnd();
+        mediaContent.ondrop = this._onDrop();
+      }
+    });
+  </script>
+</dom-module>
