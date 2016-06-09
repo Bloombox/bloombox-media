@@ -316,9 +316,12 @@
         Polymer.dom(this.$.dropMessage).classList.add("hidden");
         Polymer.dom(this.$.normalMessage).classList.remove("hidden");
         Polymer.dom.flush();
-        alert("confirm preview");
         e.preventDefault();
         e.stopPropagation();
+
+        this.fire("asset-ready", {
+          file: this.get("_file")
+        });
       },
 
       _rejectPreview: function(e) {
