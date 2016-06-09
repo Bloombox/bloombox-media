@@ -103,6 +103,13 @@
     :host .bb-uploader-preview-buttons iron-label paper-icon-button.bb-reject-button {
       color: red;
     }
+
+    :host .bb-uploader-progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
   </style>
 
   <template>
@@ -125,8 +132,8 @@
               <iron-label>Confirm <paper-icon-button class="bb-confirm-button" on-tap="_confirmPreview" icon="check"></paper-icon-button></iron-label>
               <iron-label>Reject <paper-icon-button class="bb-reject-button" on-tap="_rejectPreview" icon="favorite"></paper-icon-button></iron-label>
             </div><!-- end div.bb-uploader-preview-buttons -->
-            <div class="bb-uploader-progress hidden">
-
+            <div id="mediaProgressContainer" class="bb-uploader-progress hidden">
+              <paper-progress id="mediaProgress"></paper-progress>
             </div><!-- end div.bb-uploader-progress -->
           </div>
         </div><!-- end div.bb-uploader -->
@@ -164,6 +171,11 @@
           computed: '_computePreview(_file)'
         },
 
+        _newAssetName: {
+          type: String,
+          computed: '_computeAssetName(prefix, _file)'
+        },
+
         partner: {
           type: String,
           notify: true
@@ -176,6 +188,12 @@
         },
 
         asset: {
+          type: String,
+          value: null,
+          notify: true
+        },
+
+        prefix: {
           type: String,
           value: null,
           notify: true
@@ -206,9 +224,27 @@
         return url;
       },
 
+      _computeAssetName: function(prefix, resource) {
+        var extension = resource.file.name.split(".")[1],
+            debug = window["__debug"] || this["__debug"] || false,
+            urlPrefix = (prefix !== null && prefix !== undefined) ? prefix : "",
+            assetName;
+        function s4() {
+          return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+        }
+
+        assetName = [urlPrefix, [s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+          s4() + '-' + s4() + s4() + s4(), extension].join(".")].join("/");
+        if (debug)
+          console.log("Provisioning asset at name:", assetName);
+        return assetName;
+      },
+
       _processMediaFile: function(file) {
         var reader = new FileReader();
-        reader.onload = this._onLocalFileLoad();
+        reader.onload = this._onLocalFileLoad(file);
         return reader.readAsDataURL(file);
       },
 
@@ -282,14 +318,17 @@
         });
       },
 
-      _onLocalFileLoad: function() {
+      _onLocalFileLoad: function(file) {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
         return (function(e) {
-          var file = e.currentTarget;
+          var reader = e.currentTarget;
           if (debug)
             console.log("Local media file loaded:", e, file);
-          that._set_file(file);
+          that._set_file({
+            file: file,
+            reader: reader
+          });
           Polymer.dom(that.$.mediaPreviewButtons).classList.remove("hidden");
         });
       },
@@ -305,13 +344,14 @@
       },
 
       _computePreview: function(file) {
-        if (file !== undefined && file !== null)
-          return file.result;
+        if (file !== undefined && file !== null && file.reader !== undefined)
+          return file.reader.result;
         return null;
       },
 
       _confirmPreview: function(e) {
-        var debug = window["__debug"] || this["__debug"] || false;
+        var debug = window["__debug"] || this["__debug"] || false,
+            context;
         Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
         Polymer.dom(this.$.dropMessage).classList.add("hidden");
         Polymer.dom(this.$.normalMessage).classList.remove("hidden");
@@ -319,9 +359,15 @@
         e.preventDefault();
         e.stopPropagation();
 
-        this.fire("asset-ready", {
-          file: this.get("_file")
-        });
+        context = {
+          resource: this.get("_file"),
+          target: this.get("_newAssetName")
+        };
+
+        if (debug)
+          console.log("Firing 'asset-ready' event...", context)
+
+        this.fire("asset-ready", context);
       },
 
       _rejectPreview: function(e) {
@@ -335,6 +381,28 @@
         if (debug)
           console.log("Rejecting candidate for upload.", e);
         this._set_file(null);
+      },
+
+      setProgress: function(amount) {
+        var that = this;
+        Polymer.dom(this.$.mediaProgressContainer).classList.remove("hidden");
+        this.$.mediaProgress.value = amount;
+        Polymer.dom.flush();
+
+        if (amount === 100)
+          setTimeout((function() {
+            // finish upload
+            Polymer.dom(this.$.mediaProgressContainer).classList.add("hidden");
+            this._
+          }), 200)
+      },
+
+      adoptNewAsset: function() {
+        var newAsset = this.get("_newAssetName");
+        if (newAsset !== null && newAsset !== undefined)
+          this.set("asset", newAsset);
+        else
+          console.warn("Unable to adopt new asset because name was found to be undefined or null.");
       },
 
       selectFileForUpload: function() {
