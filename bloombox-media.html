@@ -216,8 +216,9 @@
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
         return (function(e) {
-          that.$.dropMessage.classList.remove("hidden");
-          that.$.normalMessage.classList.add("hidden");
+          Polymer.dom(that.$.dropMessage).classList.remove("hidden");
+          Polymer.dom(that.$.normalMessage).classList.add("hidden");
+          Polymer.dom.flush();
 
           e.preventDefault();
           e.dataTransfer.dropEffect = "copy";  // show in browser UI that this is a copy operation
@@ -289,7 +290,7 @@
           if (debug)
             console.log("Local media file loaded:", e, file);
           that._set_file(file);
-          that.$.mediaPreviewButtons.classList.remove("hidden");
+          Polymer.dom(that.$.mediaPreviewButtons).classList.remove("hidden");
         });
       },
 
@@ -311,9 +312,10 @@
 
       _confirmPreview: function(e) {
         var debug = window["__debug"] || this["__debug"] || false;
-        this.$.mediaPreviewButtons.classList.add("hidden");
-        this.$.dropMessage.classList.add("hidden");
-        this.$.normalMessage.classList.remove("hidden");
+        Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
+        Polymer.dom(this.$.dropMessage).classList.add("hidden");
+        Polymer.dom(this.$.normalMessage).classList.remove("hidden");
+        Polymer.dom.flush();
         alert("confirm preview");
         e.preventDefault();
         e.stopPropagation();
@@ -321,9 +323,10 @@
 
       _rejectPreview: function(e) {
         var debug = window["__debug"] || this["__debug"] || false;
-        this.$.mediaPreviewButtons.classList.add("hidden");
-        this.$.dropMessage.classList.add("hidden");
-        this.$.normalMessage.classList.remove("hidden");
+        Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
+        Polymer.dom(this.$.dropMessage).classList.add("hidden");
+        Polymer.dom(this.$.normalMessage).classList.remove("hidden");
+        Polymer.dom.flush();
         e.preventDefault();
         e.stopPropagation();
         if (debug)
