@@ -210,12 +210,13 @@
         'mediaContent.tap': 'selectFileForUpload'
       },
 
-      _buildAssetURL: function(partner, asset) {
+      _buildAssetURL: function(partner, asset, scheme) {
         // select an environment
         var debug = window["__debug"] || this["__debug"] || false,
             prefix = debug ? "sandbox/" + BloomboxMediaConfig.version
                            : BloomboxMediaConfig.version,
-            url = "https://" + BloomboxMediaConfig.host + "/" +
+            targetScheme = scheme !== undefined ? scheme : "https",
+            url = targetScheme + "://" + (scheme == "gs" ? "" : BloomboxMediaConfig.host + "/") +
                     [BloomboxMediaConfig.bucket,
                      prefix, "media", "partners", partner, asset].join("/");
 
@@ -235,8 +236,11 @@
             .substring(1);
         }
 
-        assetName = [urlPrefix, [s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-          s4() + '-' + s4() + s4() + s4(), extension].join(".")].join("/");
+        assetName = [s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+          s4() + '-' + s4() + s4() + s4(), extension].join(".");
+        if (urlPrefix.length > 0)
+          assetName = [urlPrefix, assetName].join("/");
+
         if (debug)
           console.log("Provisioning asset at name:", assetName);
         return assetName;
@@ -351,6 +355,9 @@
 
       _confirmPreview: function(e) {
         var debug = window["__debug"] || this["__debug"] || false,
+            partner = this.get("partner") || "mm",
+            assetName = this.get("_newAssetName"),
+            fileObj = this.get("_file"),
             context;
         Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
         Polymer.dom(this.$.dropMessage).classList.add("hidden");
@@ -360,8 +367,12 @@
         e.stopPropagation();
 
         context = {
-          resource: this.get("_file"),
-          target: this.get("_newAssetName")
+          resource: fileObj,
+          target: assetName,
+          url: {
+            private: this._buildAssetURL(partner, assetName, "gs"),
+            public: this._buildAssetURL(partner, assetName)
+          }
         };
 
         if (debug)
