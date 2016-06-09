@@ -6,10 +6,22 @@
 @demo demo/index.html
 @homepage bloombox.github.io
 -->
+
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../iron-label/iron-label.html">
+<link rel="import" href="../paper-progress/paper-progress.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bloombox-styles/bloombox-styles.html">
+
 
 <dom-module id="bloombox-media">
-  <style is="custom-style">
+  <style is="custom-style" include="bloombox-styles">
+    :host .hidden {
+      display: none;
+    }
+
     :host .bb-media-box {
       background: #DDD;
       height: 200px;
@@ -20,16 +32,24 @@
       justify-content: center;
     }
 
+    :host .bb-media-file-select {
+      display: none;
+    }
+
     :host .bb-media-box-content {
+      background: #888;
       width: 175px;
       height: 175px;
       position: relative;
       border: 1px solid #888;
+      overflow: hidden;
     }
 
-    :host .bb-media {
+    :host .bb-media, :host .bb-uploader-preview-image {
       display: flex;
       position: absolute;
+      align-items: center;
+      justify-content: center;
       top: 0;
       bottom: 0;
       right: 0;
@@ -62,17 +82,56 @@
       background: #CACACA;
       opacity: 1.0;
     }
+
+    :host .bb-uploader-preview-buttons {
+      background: rgba(239, 239, 239, 0.75);
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      text-align: right;
+      padding-left: 15px;
+    }
+
+    :host .bb-uploader-preview-buttons iron-label {
+      display: block;
+    }
+
+    :host .bb-uploader-preview-buttons iron-label paper-icon-button.bb-confirm-button {
+      color: var(--bloombox-green-primary);
+    }
+
+    :host .bb-uploader-preview-buttons iron-label paper-icon-button.bb-reject-button {
+      color: red;
+    }
   </style>
 
   <template>
     <div class="bb-media-box">
+      <div class="bb-media-file-select">
+        <input id="fileSelect" type="file" name="files[]" />
+      </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
           <b>Drop image here<br />Or click to select</b>
+
+          <div class="bb-uploader-preview">
+            <div class="bb-uploader-preview-image">
+              <template is="dom-if" if="[[_preview]]">
+                <img src$="[[_preview]]" alt="Image preview" height="175" />
+              </template>
+            </div><!-- end div.bb-uploader-preview -->
+            <div id="mediaPreviewButtons" class="bb-uploader-preview-buttons hidden">
+              <iron-label>Confirm <paper-icon-button class="bb-confirm-button" on-tap="_confirmPreview" icon="check"></paper-icon-button></iron-label>
+              <iron-label>Reject <paper-icon-button class="bb-reject-button" on-tap="_rejectPreview" icon="favorite"></paper-icon-button></iron-label>
+            </div><!-- end div.bb-uploader-preview-buttons -->
+            <div class="bb-uploader-progress hidden">
+
+            </div><!-- end div.bb-uploader-progress -->
+          </div>
         </div><!-- end div.bb-uploader -->
         <template is="dom-if" if="[[_src]]">
           <div class="bb-media">
-            <img alt="{{alt}}" src="[[_src]]" class="bb-media-item" width="175" />
+            <img alt="[[alt]]" src="[[_src]]" class="bb-media-item" height="175" />
           </div><!-- end div.bb-media -->
         </template>
       </div><!-- end div.bb-media-box-content -->
@@ -94,23 +153,37 @@
           computed: '_computeImageSrc(partner, asset, href)'
         },
 
+        _file: {
+          type: Object,
+          readOnly: true
+        },
+
+        _preview: {
+          type: String,
+          computed: '_computePreview(_file)'
+        },
+
         partner: {
-          type: String
+          type: String,
+          notify: true
         },
 
         alt: {
           type: String,
-          value: "Product media"
+          value: "Product media",
+          notify: true
         },
 
         asset: {
           type: String,
-          value: null
+          value: null,
+          notify: true
         },
 
         href: {
           type: String,
-          value: null
+          value: null,
+          notify: true
         }
       },
 
@@ -132,11 +205,18 @@
         return url;
       },
 
+      _processMediaFile: function(file) {
+        var reader = new FileReader();
+        reader.onload = this._onLocalFileLoad();
+        return reader.readAsDataURL(file);
+      },
+
       _onDragOver: function() {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
         return (function(e) {
           e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";  // show in browser UI that this is a copy operation
           if (debug)
             console.log("Media uploader file drag over:", e);
         });
@@ -152,20 +232,48 @@
         });
       },
 
+      _checkFileType: function(file) {
+        var debug = window["__debug"] || this["__debug"] || false;
+
+        if (debug)
+          console.log("Checking file type...", file);
+        if (!file.type.match('image.*')) {
+          console.error("Item was found not to be a supported media type:", file);
+          alert("Only image files are supported as media.");
+          return false;
+        }
+        return true;
+      },
+
       _onDrop: function() {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
         return (function(e) {
-          debugger;
-          var file = e.dataTransfer.files[0],
-              reader = new FileReader();
-
-          reader.onload = that._onLocalFileLoad();
-          reader.readAsDataURL(file);
+          var file = e.dataTransfer.files[0];
           e.preventDefault();
+          e.stopPropagation();
 
-          if (debug)
-            console.log("Media uploader file drop:", e, file);
+          if (that._checkFileType(file)) {
+            if (debug)
+              console.log("Media uploader file drop:", e, file);
+            that._processMediaFile(file);
+          }
+        });
+      },
+
+      _onFileSelect: function() {
+        var that = this,
+            debug = window["__debug"] || this["__debug"] || false;
+        return (function(e) {
+          var file = e.target.files[0];
+          e.preventDefault();
+          e.stopPropagation();
+
+          if (that._checkFileType(file)) {
+            if (debug)
+              console.log("Selected file:", file);
+            that._processMediaFile(file);
+          }
         });
       },
 
@@ -173,8 +281,11 @@
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
         return (function(e) {
+          var file = e.currentTarget;
           if (debug)
-            console.log("Local media file loaded:", e);
+            console.log("Local media file loaded:", e, file);
+          that._set_file(file);
+          that.$.mediaPreviewButtons.classList.remove("hidden");
         });
       },
 
@@ -188,18 +299,44 @@
         }
       },
 
+      _computePreview: function(file) {
+        if (file !== undefined && file !== null)
+          return file.result;
+        return null;
+      },
+
+      _confirmPreview: function(e) {
+        var debug = window["__debug"] || this["__debug"] || false;
+        this.$.mediaPreviewButtons.classList.add("hidden");
+        alert("confirm preview");
+        e.preventDefault();
+        e.stopPropagation();
+      },
+
+      _rejectPreview: function(e) {
+        var debug = window["__debug"] || this["__debug"] || false;
+        this.$.mediaPreviewButtons.classList.add("hidden");
+        e.preventDefault();
+        e.stopPropagation();
+        if (debug)
+          console.log("Rejecting candidate for upload.", e);
+        this._set_file(null);
+      },
+
       selectFileForUpload: function() {
-        alert("would select file for upload");
+        this.$.fileSelect.click();
       },
 
       ready: function() {
         var debug = window["__debug"] || this["__debug"] || false,
-            mediaContent = this.$.mediaContent;
+            mediaContent = this.$.mediaContent,
+            fileSelect = this.$.fileSelect;
         if (debug) console.log("Attaching event listeners for media uploader...");
 
         mediaContent.ondragover = this._onDragOver();
         mediaContent.ondragend = this._onDragEnd();
         mediaContent.ondrop = this._onDrop();
+        fileSelect.onchange = this._onFileSelect();
       }
     });
   </script>
