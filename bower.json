@@ -23,7 +23,7 @@
   "ignore": [],
   "dependencies": {
     "polymer": "Polymer/polymer#^1.5.0",
-    "bloombox-styles": "bloombox/bloombox-styles#^0.0.1"
+    "bloombox-styles": "bloombox/bloombox-styles#^0.0.2"
   },
   "devDependencies": {
     "iron-component-page": "polymerelements/iron-component-page#^1.1.6",
