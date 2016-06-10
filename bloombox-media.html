@@ -61,6 +61,11 @@
       cursor: pointer;
     }
 
+    :host[disabled] .bb-media:hover {
+      opacity: 1;
+      cursor: inherit;
+    }
+
     :host .bb-uploader {
       background: #888;
       opacity: 0.8;
@@ -81,6 +86,13 @@
     :host .bb-uploader.media-hover, :host .bb-uploader:hover {
       background: #CACACA;
       opacity: 1.0;
+      cursor: pointer;
+    }
+
+    :host[disabled] .bb-uploader.media-hover, :host[disabled] .bb-uploader:hover {
+      opacity: 0.8;
+      background: #888;
+      cursor: inherit;
     }
 
     :host .bb-uploader-preview-buttons {
@@ -119,8 +131,12 @@
       </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
-          <b id="normalMessage">Drag image<br />Or click to select</b>
-          <b id="dropMessage" class="hidden">Drop image here</b>
+          <template is="dom-if" if="[[!disabled]]">
+            <b>Drop image here<br />Or click to select</b>
+          </template>
+          <template is="dom-if" if="[[disabled]]">
+            <b>No image</b>
+          </template>
 
           <div class="bb-uploader-preview">
             <div class="bb-uploader-preview-image">
@@ -178,6 +194,12 @@
 
         partner: {
           type: String,
+          notify: true
+        },
+
+        disabled: {
+          type: Boolean,
+          value: false,
           notify: true
         },
 
@@ -252,31 +274,6 @@
         return reader.readAsDataURL(file);
       },
 
-      _onDragOver: function() {
-        var that = this,
-            debug = window["__debug"] || this["__debug"] || false;
-        return (function(e) {
-          Polymer.dom(that.$.dropMessage).classList.remove("hidden");
-          Polymer.dom(that.$.normalMessage).classList.add("hidden");
-          Polymer.dom.flush();
-
-          e.preventDefault();
-          e.dataTransfer.dropEffect = "copy";  // show in browser UI that this is a copy operation
-          if (debug)
-            console.log("Media uploader file drag over:", e);
-        });
-      },
-
-      _onDragEnd: function() {
-        var that = this,
-            debug = window["__debug"] || this["__debug"] || false;
-        return (function(e) {
-          e.preventDefault();
-          if (debug)
-            console.log("Media uploader file drag end:", e);
-        });
-      },
-
       _checkFileType: function(file) {
         var debug = window["__debug"] || this["__debug"] || false;
 
@@ -290,18 +287,44 @@
         return true;
       },
 
+      _onDragOver: function() {
+        var that = this,
+            debug = window["__debug"] || this["__debug"] || false;
+        return (function(e) {
+          var disabled = that.get("disabled") || false;
+          e.preventDefault();
+
+          if (!disabled) {
+            e.dataTransfer.dropEffect = "copy";  // show in browser UI that this is a copy operation
+            if (debug)
+              console.log("Media uploader file drag over:", e);
+          }
+        });
+      },
+
+      _onDragEnd: function() {
+        var that = this,
+            debug = window["__debug"] || this["__debug"] || false;
+        return (function(e) {
+          e.preventDefault();
+        });
+      },
+
       _onDrop: function() {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
         return (function(e) {
-          var file = e.dataTransfer.files[0];
+          var file = e.dataTransfer.files[0],
+              disabled = that.get("disabled") || false;
           e.preventDefault();
           e.stopPropagation();
 
-          if (that._checkFileType(file)) {
-            if (debug)
-              console.log("Media uploader file drop:", e, file);
-            that._processMediaFile(file);
+          if (!disabled) {
+            if (that._checkFileType(file)) {
+              if (debug)
+                console.log("Media uploader file drop:", e, file);
+              that._processMediaFile(file);
+            }
           }
         });
       },
@@ -310,14 +333,17 @@
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
         return (function(e) {
-          var file = e.target.files[0];
+          var file = e.target.files[0],
+              disabled = that.get("disabled") || false;
           e.preventDefault();
           e.stopPropagation();
 
-          if (that._checkFileType(file)) {
-            if (debug)
-              console.log("Selected file:", file);
-            that._processMediaFile(file);
+          if (!disabled) {
+            if (that._checkFileType(file)) {
+              if (debug)
+                console.log("Selected file:", file);
+              that._processMediaFile(file);
+            }
           }
         });
       },
@@ -360,8 +386,6 @@
             fileObj = this.get("_file"),
             context;
         Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
-        Polymer.dom(this.$.dropMessage).classList.add("hidden");
-        Polymer.dom(this.$.normalMessage).classList.remove("hidden");
         Polymer.dom.flush();
         e.preventDefault();
         e.stopPropagation();
@@ -417,7 +441,11 @@
       },
 
       selectFileForUpload: function() {
-        this.$.fileSelect.click();
+        var disabled = this.get("disabled") || false,
+            preview = this.get("_preview") || null;
+        if (!disabled && preview === null) {
+          this.$.fileSelect.click();
+        }
       },
 
       ready: function() {
