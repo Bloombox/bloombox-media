@@ -1,6 +1,6 @@
 {
   "name": "bloombox-media",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Provides media preview and upload functionality for Bloombox products",
   "main": "index.html",
   "repository": {
