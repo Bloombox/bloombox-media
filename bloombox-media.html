@@ -436,6 +436,10 @@
         return this.get("_file") || null;
       },
 
+      getNewFileName: function() {
+        return this.get("_newAssetName") || null;
+      },
+
       adoptNewAsset: function() {
         var newAsset = this.get("_newAssetName");
         if (newAsset !== null && newAsset !== undefined)
