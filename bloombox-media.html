@@ -402,7 +402,7 @@
         if (debug)
           console.log("Firing 'asset-ready' event...", context)
 
-        this.fire("asset-ready", context);
+        this.fire("asset-ready", this, context);
       },
 
       _rejectPreview: function(e) {
