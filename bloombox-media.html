@@ -197,6 +197,15 @@
           notify: true
         },
 
+        environment: {
+          type: String,
+          notify: true,
+          value: function() {
+            var bloom = window["bloom"];
+            return bloom !== undefined ? bloom.config.transport.environment : "sandbox";
+          }
+        },
+
         disabled: {
           type: Boolean,
           value: false,
