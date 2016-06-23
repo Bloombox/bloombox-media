@@ -172,31 +172,55 @@
     Polymer.BloomboxMedia = Polymer({
       is: 'bloombox-media',
       properties: {
+        /**
+         * Computed property that provides a source URL for the subject attached
+         * media asset, if any.
+         */
         _src: {
           type: String,
           computed: '_computeImageSrc(partner, asset, href)'
         },
 
+        /**
+         * Internal property that provides access to the `File` object during
+         * attachment of a new media item.
+         */
         _file: {
           type: Object,
           readOnly: true
         },
 
+        /**
+         * Internal property that computes a Data URL-based preview of the attached
+         * file for upload.
+         */
         _preview: {
           type: String,
           computed: '_computePreview(_file)'
         },
 
+        /**
+         * Internal property that computes a random new name for a new asset to be
+         * attached and uploaded.
+         */
         _newAssetName: {
           type: String,
           computed: '_computeAssetName(prefix, _file)'
         },
 
+        /**
+         * Holds the name of the currently-active partner, which is used to determine
+         * URLs for upload and download.
+         */
         partner: {
           type: String,
           notify: true
         },
 
+        /**
+         * The current database environment, which is used to determine URLs for upload
+         * and download.
+         */
         environment: {
           type: String,
           notify: true,
@@ -206,30 +230,46 @@
           }
         },
 
+        /**
+         * Flag indicating the active state interactive portions of this component's
+         * UI and functionality.
+         */
         disabled: {
           type: Boolean,
           value: false,
           notify: true
         },
 
+        /**
+         * Value to use as an `alt` for the media image, if any.
+         */
         alt: {
           type: String,
           value: "Product media",
           notify: true
         },
 
+        /**
+         * Relative reference to a stored asset.
+         */
         asset: {
           type: String,
           value: null,
           notify: true
         },
 
+        /**
+         * Prefix to prepend to asset URLs, if any.
+         */
         prefix: {
           type: String,
           value: null,
           notify: true
         },
 
+        /**
+         * Explicit absolute asset reference, for utility.
+         */
         href: {
           type: String,
           value: null,
@@ -241,6 +281,10 @@
         'mediaContent.tap': 'selectFileForUpload'
       },
 
+      /**
+       * Helper function that builds an asset URL based on the current
+       * `partner` and any relative `asset` reference.
+       */
       _buildAssetURL: function(partner, asset, scheme) {
         // select an environment
         var debug = window["__debug"] || this["__debug"] || false,
@@ -257,6 +301,10 @@
         return url;
       },
 
+      /**
+       * Helper function that builds a UUID-style random name for a
+       * new asset due to be uploaded and attached.
+       */
       _computeAssetName: function(prefix, resource) {
         var extension = resource.file.name.split(".")[1],
             debug = window["__debug"] || this["__debug"] || false,
@@ -270,20 +318,30 @@
 
         assetName = [s4() + s4() + '-' + s4() + '-' + s4() + '-' +
           s4() + '-' + s4() + s4() + s4(), extension].join(".");
-        if (urlPrefix.length > 0)
+        if (urlPrefix.length > 0) {
           assetName = [urlPrefix, assetName].join("/");
-
-        if (debug)
-          console.log("Provisioning asset at name:", assetName);
+        }
+        if (debug) {
+          console.info("Provisioning asset at name:", assetName);
+        }
         return assetName;
       },
 
+      /**
+       * Internal helper function that reads a file as a Data URL. Used
+       * to generate and show a preview of an asset before upload.
+       */
       _processMediaFile: function(file) {
         var reader = new FileReader();
         reader.onload = this._onLocalFileLoad(file);
         return reader.readAsDataURL(file);
       },
 
+      /**
+       * Internal helper function that determines whether a file type is
+       * valid to attach as a media item. Currently, this responds truthy
+       * if the content type matches `image.*`.
+       */
       _checkFileType: function(file) {
         var debug = window["__debug"] || this["__debug"] || false;
 
@@ -297,6 +355,10 @@
         return true;
       },
 
+      /**
+       * UI responder function that is dispatched when a user drags a media
+       * item over the droppable zone.
+       */
       _onDragOver: function() {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
@@ -305,13 +367,17 @@
           e.preventDefault();
 
           if (!disabled) {
-            e.dataTransfer.dropEffect = "copy";  // show in browser UI that this is a copy operation
+            e.dataTransfer.dropEffect = "copy";  // browser UI hint
             if (debug)
               console.log("Media uploader file drag over:", e);
           }
         });
       },
 
+      /**
+       * UI responder function that is dispatched when a user finishes dragging
+       * a media item over the droppable zone.
+       */
       _onDragEnd: function() {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
@@ -320,6 +386,10 @@
         });
       },
 
+      /**
+       * UI responder function that is dispatched when a user drops an item onto
+       * a droppable zone.
+       */
       _onDrop: function() {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
@@ -339,6 +409,10 @@
         });
       },
 
+      /**
+       * UI responder function that is dispatched when a user indicates a desire
+       * to select a file via browsing their computer.
+       */
       _onFileSelect: function() {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
@@ -358,6 +432,11 @@
         });
       },
 
+      /**
+       * UI responder function that is dispatched once a local media file, either
+       * via drag-and-drop or browse-style selection, is ready to be considered
+       * as a candidate for upload.
+       */
       _onLocalFileLoad: function(file) {
         var that = this,
             debug = window["__debug"] || this["__debug"] || false;
@@ -373,6 +452,14 @@
         });
       },
 
+      /**
+       * Compute function backing the `_src` property. Calculates an absolute link
+       * for an asset URL given the necessary components - the active `partner` and
+       * the relative `asset` reference.
+       *
+       * *Note:* if an explicit `href` is provided, this is where it is returned in
+       * lieu of calculating a new link.
+       */
       _computeImageSrc: function(partner, asset, href) {
         if (href !== null) {
           // we have an explicit media URL
@@ -383,12 +470,20 @@
         }
       },
 
+      /**
+       * Compute function that generates a preview of an asset file once it has
+       * been selected as a candidate for upload.
+       */
       _computePreview: function(file) {
         if (file !== undefined && file !== null && file.reader !== undefined)
           return file.reader.result;
         return null;
       },
 
+      /**
+       * UI responder function that confirms a candidate asset file and begins
+       * the process of uploading and attaching it to the parent item.
+       */
       _confirmPreview: function(e) {
         var debug = window["__debug"] || this["__debug"] || false,
             partner = this.get("partner") || "mm",
@@ -415,6 +510,10 @@
         this.fire("asset-ready", this, context);
       },
 
+      /**
+       * UI responder function that rejects a candidate asset file and resets
+       * the UI for further use.
+       */
       _rejectPreview: function(e) {
         var debug = window["__debug"] || this["__debug"] || false;
         Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
@@ -428,6 +527,10 @@
         this._set_file(null);
       },
 
+      /**
+       * Set the current upload progress state. Usually dispatched from a parent
+       * context that is managing the storage upload process.
+       */
       setProgress: function(amount) {
         var that = this;
         Polymer.dom(this.$.mediaProgressContainer).classList.remove("hidden");
@@ -441,14 +544,30 @@
           }), 200)
       },
 
+      /**
+       * Retrieve a `File` object for a current candidate-for-upload. Used once
+       * an asset is "confirmed" to conduct the actual upload process.
+       */
       getFile: function() {
         return this.get("_file") || null;
       },
 
+      /**
+       * Retrieve the newly-generated name for the current candidate-for-upload.
+       * Used once an asset is "confirmed" to determine the storage location to
+       * upload to.
+       */
       getNewFileName: function() {
         return this.get("_newAssetName") || null;
       },
 
+      /**
+       * Called when an asset has completed upload and the parent context wishes
+       * to inform us that the asset is ready to be "adopted." In this phase, the
+       * UI shifts over to using the new asset, and presumably, the parent object
+       * writes the new relative asset reference to its `photos` array, or
+       * something similar.
+       */
       adoptNewAsset: function() {
         var newAsset = this.get("_newAssetName");
         if (newAsset !== null && newAsset !== undefined)
@@ -457,6 +576,11 @@
           console.warn("Unable to adopt new asset because name was found to be undefined or null.");
       },
 
+      /**
+       * Triggers file browse UI. If a user selects a file this way, it is
+       * previewed in the UI and the user is prompted to confirm or reject the new
+       * asset for upload.
+       */
       selectFileForUpload: function() {
         var disabled = this.get("disabled") || false,
             preview = this.get("_preview") || null;
@@ -465,6 +589,9 @@
         }
       },
 
+      /**
+       * Ready-state lifecycle callback, used to attach DOM drag/drop events.
+       */
       ready: function() {
         var debug = window["__debug"] || this["__debug"] || false,
             mediaContent = this.$.mediaContent,
