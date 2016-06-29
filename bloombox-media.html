@@ -223,11 +223,7 @@
          */
         environment: {
           type: String,
-          notify: true,
-          value: function() {
-            var bloom = window["bloom"];
-            return bloom !== undefined ? bloom.config.transport.environment : "sandbox";
-          }
+          notify: true
         },
 
         /**
