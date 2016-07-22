@@ -131,10 +131,10 @@
       </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
-          <template is="dom-if" if="[[!disabled]]">
+          <template is="dom-if" if="[[!_shouldShowDisabled]]">
             <b>Drop image here<br />Or click to select</b>
           </template>
-          <template is="dom-if" if="[[disabled]]">
+          <template is="dom-if" if="[[_shouldShowDisabled]]">
             <b>No image</b>
           </template>
 
@@ -179,6 +179,16 @@
         _src: {
           type: String,
           computed: '_computeImageSrc(partner, asset, href)'
+        },
+
+        /**
+         * Computed property that controls whether this widget should show itself
+         * with a disabled overlay.
+         */
+        _shouldShowDisabled: {
+          type: Boolean,
+          notify: true,
+          computed: '_computeShouldShowDisabled(disabled, asset, href)'
         },
 
         /**
@@ -295,6 +305,18 @@
         if (debug)
           console.log("Built media URL for asset '" + asset + "':", url);
         return url;
+      },
+
+      /**
+       * Compute function for deciding whether to show the disabled
+       * overlay or not.
+       */
+      _computeShouldShowDisabled: function(disabled, asset, href) {
+        if (disabled === true && !((typeof asset === "string" && asset.length > 1) ||
+                                   (typeof href === "string" && href.length > 1))) {
+          return true;  // enable the overlay
+        }
+        return false;  // don't enable the overlay
       },
 
       /**
