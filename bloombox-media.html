@@ -134,7 +134,7 @@
           <template is="dom-if" if="[[!_shouldShowDisabled]]">
             <b>Drop image here<br />Or click to select</b>
           </template>
-          <template is="dom-if" if="[[_shouldShowDisabled]]">
+          <template is="dom-if" if="[[_hasNoImage]]">
             <b>No image</b>
           </template>
 
@@ -145,8 +145,8 @@
               </template>
             </div><!-- end div.bb-uploader-preview -->
             <div id="mediaPreviewButtons" class="bb-uploader-preview-buttons hidden">
-              <iron-label>Confirm <paper-icon-button class="bb-confirm-button" on-tap="_confirmPreview" icon="check"></paper-icon-button></iron-label>
-              <iron-label>Reject <paper-icon-button class="bb-reject-button" on-tap="_rejectPreview" icon="favorite"></paper-icon-button></iron-label>
+              <iron-label>Confirm<paper-icon-button class="bb-confirm-button" on-tap="_confirmPreview" icon="check"></paper-icon-button></iron-label>
+              <iron-label>Reject<paper-icon-button class="bb-reject-button" on-tap="_rejectPreview" icon="favorite"></paper-icon-button></iron-label>
             </div><!-- end div.bb-uploader-preview-buttons -->
             <div id="mediaProgressContainer" class="bb-uploader-progress hidden">
               <paper-progress id="mediaProgress"></paper-progress>
@@ -189,6 +189,15 @@
           type: Boolean,
           notify: true,
           computed: '_computeShouldShowDisabled(disabled, asset, href)'
+        },
+
+        /**
+         * Computed property that decides whether to show the "NO IMAGE" UI.
+         */
+        _hasNoImage: {
+          type: Boolean,
+          notify: true,
+          computed: '_computeHasNoImage(asset, href)'
         },
 
         /**
@@ -343,6 +352,16 @@
           console.info("Provisioning asset at name:", assetName);
         }
         return assetName;
+      },
+
+      /**
+       * Helper compute function that indicates whether we have no
+       * image.
+       */
+      _computeHasNoImage: function(asset, href) {
+        return (!((typeof asset === "string" && asset.length > 1) ||
+                 (typeof href === "string" && href.length > 1))) &&
+               this._shouldShowDisabled;
       },
 
       /**
