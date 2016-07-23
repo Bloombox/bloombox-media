@@ -131,7 +131,12 @@
       </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
-          <b>[[_overlayLabel]]</b>
+          <template is="dom-if" if="[[!disabled]]">
+            <b>[[_overlayLabel]]</b>
+          </template>
+          <template is="dom-if" if="[[disabled]]">
+            <b>No image</b>
+          </template>
 
           <div class="bb-uploader-preview">
             <div class="bb-uploader-preview-image">
