@@ -131,12 +131,7 @@
       </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
-          <template is="dom-if" if="[[!_shouldShowDisabled]]">
-            <b>Drop image here<br />Or click to select</b>
-          </template>
-          <template is="dom-if" if="[[_hasNoImage]]">
-            <b>No image</b>
-          </template>
+          <b>[[_overlayLabel]]</b>
 
           <div class="bb-uploader-preview">
             <div class="bb-uploader-preview-image">
@@ -194,10 +189,10 @@
         /**
          * Computed property that decides whether to show the "NO IMAGE" UI.
          */
-        _hasNoImage: {
+        _overlayLabel: {
           type: Boolean,
           notify: true,
-          computed: '_computeHasNoImage(asset, href)'
+          computed: '_computeOverlayLabel(disabled, asset, href)'
         },
 
         /**
@@ -321,11 +316,23 @@
        * overlay or not.
        */
       _computeShouldShowDisabled: function(disabled, asset, href) {
-        if (disabled === true && !((typeof asset === "string" && asset.length > 1) ||
-                                   (typeof href === "string" && href.length > 1))) {
-          return true;  // enable the overlay
+        return (disabled === true || !((typeof asset === "string" && asset.length > 1) ||
+                                       (typeof href === "string" && href.length > 1)));
+      },
+
+      /**
+       * Helper compute function that indicates whether we have no
+       * image.
+       */
+      _computeOverlayLabel: function(disabled, asset, href) {
+        if (!((typeof asset === "string" && asset.length > 1) ||
+              (typeof href === "string" && href.length > 1))) {
+          if (disabled) {
+            return "No Image";
+          }
+          return "Drop image here";
         }
-        return false;  // don't enable the overlay
+        return "Change photo";
       },
 
       /**
@@ -352,16 +359,6 @@
           console.info("Provisioning asset at name:", assetName);
         }
         return assetName;
-      },
-
-      /**
-       * Helper compute function that indicates whether we have no
-       * image.
-       */
-      _computeHasNoImage: function(asset, href) {
-        return (!((typeof asset === "string" && asset.length > 1) ||
-                 (typeof href === "string" && href.length > 1))) &&
-               this._shouldShowDisabled;
       },
 
       /**
