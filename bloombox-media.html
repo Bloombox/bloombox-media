@@ -131,10 +131,10 @@
       </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
-          <template is="dom-if" if="[[!disabled]]">
+          <template is="dom-if" if="[[!_shouldShowDisabled]]">
             <b>[[_overlayLabel]]</b>
           </template>
-          <template is="dom-if" if="[[disabled]]">
+          <template is="dom-if" if="[[_noAssetAndDisabled]]">
             <b>No image</b>
           </template>
 
@@ -189,6 +189,16 @@
           type: Boolean,
           notify: true,
           computed: '_computeShouldShowDisabled(disabled, asset, href)'
+        },
+
+        /**
+         * Computed property that controls the message displayed when the widget
+         * is or is not disabled and has no asset.
+         */
+        _noAssetAndDisabled: {
+          type: Boolean,
+          notify: true,
+          computed: '_computeNoAssetAndDisabled(disabled, asset, href)'
         },
 
         /**
@@ -322,6 +332,15 @@
        */
       _computeShouldShowDisabled: function(disabled, asset, href) {
         return (disabled === true || !((typeof asset === "string" && asset.length > 1) ||
+                                       (typeof href === "string" && href.length > 1)));
+      },
+
+      /**
+       * Compute function for displaying the label associated with
+       * a disabled-state.
+       */
+      _computeNoAssetAndDisabled: function(disabled, asset, href) {
+        return (disabled === true && !((typeof asset === "string" && asset.length > 1) ||
                                        (typeof href === "string" && href.length > 1)));
       },
 
