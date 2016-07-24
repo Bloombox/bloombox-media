@@ -56,14 +56,12 @@
       left: 0;
     }
 
-    :host .bb-media:hover {
-      opacity: 0.35;
-      cursor: pointer;
+    :host[disabled] .bb-media:hover, :host[disabled] .bb-uploader {
+      cursor: default;
     }
 
-    :host[disabled] .bb-media:hover {
-      opacity: 1;
-      cursor: inherit;
+    :host[editable] .bb-media {
+      opacity: 0.35;
     }
 
     :host .bb-uploader {
@@ -81,18 +79,6 @@
       font-size: 80%;
       text-transform: uppercase;
       text-align: center;
-    }
-
-    :host .bb-uploader.media-hover, :host .bb-uploader:hover {
-      background: #CACACA;
-      opacity: 1.0;
-      cursor: pointer;
-    }
-
-    :host[disabled] .bb-uploader.media-hover, :host[disabled] .bb-uploader:hover {
-      opacity: 0.8;
-      background: #888;
-      cursor: inherit;
     }
 
     :host .bb-uploader-preview-buttons {
@@ -131,11 +117,11 @@
       </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
-          <template is="dom-if" if="[[!_shouldShowDisabled]]">
-            <b>[[_overlayLabel]]</b>
+          <template is="dom-if" if="[[editable]]">
+            <b>Drop an image or<br />Click to Change Photo</b>
           </template>
-          <template is="dom-if" if="[[_noAssetAndDisabled]]">
-            <b>No image</b>
+          <template is="dom-if" if="[[_notEditableAndNoAssets]]">
+            <b>No Photo</b>
           </template>
 
           <div class="bb-uploader-preview">
@@ -182,35 +168,6 @@
         },
 
         /**
-         * Computed property that controls whether this widget should show itself
-         * with a disabled overlay.
-         */
-        _shouldShowDisabled: {
-          type: Boolean,
-          notify: true,
-          computed: '_computeShouldShowDisabled(disabled, asset, href)'
-        },
-
-        /**
-         * Computed property that controls the message displayed when the widget
-         * is or is not disabled and has no asset.
-         */
-        _noAssetAndDisabled: {
-          type: Boolean,
-          notify: true,
-          computed: '_computeNoAssetAndDisabled(disabled, asset, href)'
-        },
-
-        /**
-         * Computed property that decides whether to show the "NO IMAGE" UI.
-         */
-        _overlayLabel: {
-          type: Boolean,
-          notify: true,
-          computed: '_computeOverlayLabel(disabled, asset, href)'
-        },
-
-        /**
          * Internal property that provides access to the `File` object during
          * attachment of a new media item.
          */
@@ -238,6 +195,15 @@
         },
 
         /**
+         * Internal property that computes whether we are in an editable mode with
+         * no available assets. In that case, a "No Photo" label should be shown.
+         */
+        _notEditableAndNoAssets: {
+          type: Boolean,
+          computed: '_computeNotEditableAndNoAssets(editable, asset, href)'
+        },
+
+        /**
          * Holds the name of the currently-active partner, which is used to determine
          * URLs for upload and download.
          */
@@ -260,6 +226,16 @@
          * UI and functionality.
          */
         disabled: {
+          type: Boolean,
+          value: false,
+          notify: true
+        },
+
+        /**
+         * Flag indicating that our media widget is being displayed in a zerostate form
+         * and should provide editing capabilities.
+         */
+        editable: {
           type: Boolean,
           value: false,
           notify: true
@@ -327,39 +303,6 @@
       },
 
       /**
-       * Compute function for deciding whether to show the disabled
-       * overlay or not.
-       */
-      _computeShouldShowDisabled: function(disabled, asset, href) {
-        return (disabled === true || !((typeof asset === "string" && asset.length > 1) ||
-                                       (typeof href === "string" && href.length > 1)));
-      },
-
-      /**
-       * Compute function for displaying the label associated with
-       * a disabled-state.
-       */
-      _computeNoAssetAndDisabled: function(disabled, asset, href) {
-        return (disabled === true && !((typeof asset === "string" && asset.length > 1) ||
-                                       (typeof href === "string" && href.length > 1)));
-      },
-
-      /**
-       * Helper compute function that indicates whether we have no
-       * image.
-       */
-      _computeOverlayLabel: function(disabled, asset, href) {
-        if (!((typeof asset === "string" && asset.length > 1) ||
-              (typeof href === "string" && href.length > 1))) {
-          if (disabled) {
-            return "No Image";
-          }
-          return "Drop image here";
-        }
-        return "Change photo";
-      },
-
-      /**
        * Helper function that builds a UUID-style random name for a
        * new asset due to be uploaded and attached.
        */
@@ -383,6 +326,15 @@
           console.info("Provisioning asset at name:", assetName);
         }
         return assetName;
+      },
+
+      /**
+       * Helper function that computes state for non-editable widgets
+       * that have no assets.
+       */
+      _computeNotEditableAndNoAssets: function(editable, asset, href) {
+        return (editable != true && !((typeof asset === "string" && asset.length > 1) ||
+                                      (typeof href === "string" && href.length > 1)));
       },
 
       /**
