@@ -606,8 +606,6 @@
         var debug = window["__debug"] || this["__debug"] || false,
             mediaContent = this.$.mediaContent,
             fileSelect = this.$.fileSelect;
-        if (debug) console.log("Attaching event listeners for media uploader...");
-
         mediaContent.ondragover = this._onDragOver();
         mediaContent.ondragend = this._onDragEnd();
         mediaContent.ondrop = this._onDrop();
