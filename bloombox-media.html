@@ -10,107 +10,126 @@
 <link rel="import" href="../polymer/polymer.html">
 <link rel="import" href="../iron-icon/iron-icon.html">
 <link rel="import" href="../iron-icons/iron-icons.html">
-<link rel="import" href="../iron-label/iron-label.html">
+
+<link rel="import" href="../paper-button/paper-button.html">
 <link rel="import" href="../paper-progress/paper-progress.html">
-<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+
 <link rel="import" href="../bloombox-styles/bloombox-styles.html">
 
 
 <dom-module id="bloombox-media">
-  <style is="custom-style" include="bloombox-styles">
-    :host .hidden {
-      display: none;
-    }
+  <template strip-whitespace>
+    <style is="custom-style" include="bloombox-styles">
+      :host .hidden {
+        display: none;
+      }
 
-    :host .bb-media-box {
-      background: #DDD;
-      height: 200px;
-      width: 200px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+      :host .bb-media-box {
+        background: #DDD;
+        height: 200px;
+        width: 200px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    :host .bb-media-file-select {
-      display: none;
-    }
+      :host .bb-media-file-select {
+        display: none;
+      }
 
-    :host .bb-media-box-content {
-      background: #888;
-      width: 175px;
-      height: 175px;
-      position: relative;
-      border: 1px solid #888;
-      overflow: hidden;
-    }
+      :host .bb-media-preview {
+        z-index: 999;
+        opacity: 1;
+      }
 
-    :host .bb-media, :host .bb-uploader-preview-image {
-      display: flex;
-      position: absolute;
-      align-items: center;
-      justify-content: center;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-    }
+      :host .bb-media-box-content {
+        background: #888;
+        width: 175px;
+        height: 175px;
+        position: relative;
+        border: 1px solid #888;
+        overflow: hidden;
+      }
 
-    :host[disabled] .bb-media:hover, :host[disabled] .bb-uploader {
-      cursor: default;
-    }
+      :host .bb-media, :host .bb-uploader-preview-image {
+        display: flex;
+        position: absolute;
+        align-items: center;
+        justify-content: center;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+      }
 
-    :host[editable] .bb-media {
-      opacity: 0.35;
-    }
+      :host[disabled] .bb-media:hover, :host[disabled] .bb-uploader {
+        cursor: default;
+      }
 
-    :host .bb-uploader {
-      background: #888;
-      opacity: 0.8;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      right: 0;
-      left: 0;
-      cursor: pointer;
-      font-size: 80%;
-      text-transform: uppercase;
-      text-align: center;
-    }
+      :host .bb-uploader {
+        background: #888;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        cursor: pointer;
+        font-size: 80%;
+        text-transform: uppercase;
+        text-align: center;
+      }
 
-    :host .bb-uploader-preview-buttons {
-      background: rgba(239, 239, 239, 0.75);
-      position: absolute;
-      bottom: 0;
-      right: 0;
-      text-align: right;
-      padding-left: 15px;
-    }
+      :host .bb-uploader-preview-buttons {
+        background: rgba(239, 239, 239, 0.75);
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        text-align: center;
+        padding-left: 15px;
+        z-index: 1000;
+      }
 
-    :host .bb-uploader-preview-buttons iron-label {
-      display: block;
-    }
+      :host .bb-uploader-preview-buttons iron-label {
+        display: block;
+      }
 
-    :host .bb-uploader-preview-buttons iron-label paper-icon-button.bb-confirm-button {
-      color: var(--bloombox-green-primary);
-    }
+      :host .bb-uploader-preview-buttons paper-button.bb-confirm-button {
+        color: var(--bloombox-green-primary);
+        --paper-button-ink-color: var(--bloombox-green-secondary);
+      }
 
-    :host .bb-uploader-preview-buttons iron-label paper-icon-button.bb-reject-button {
-      color: red;
-    }
+      :host .bb-uploader-preview-buttons paper-button.bb-reject-button {
+        color: red;
+        --paper-button-ink-color: orange;
+      }
 
-    :host .bb-uploader-progress {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-    }
-  </style>
+      :host .instruction-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: #777;
+        opacity: 0.8;
+        color: white;
+        height: 45px;
+        z-index: 1000;
+        line-height: 15px;
+        padding-top: 15px;
+      }
 
-  <template>
+      :host .bb-uploader-progress {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+    </style>
+
     <div class="bb-media-box">
       <div class="bb-media-file-select">
         <input id="fileSelect" type="file" name="files[]" />
@@ -118,30 +137,27 @@
       <div id="mediaContent" class="bb-media-box-content">
         <div id="uploader" class="bb-uploader">
           <template is="dom-if" if="[[editable]]">
-            <b>Drop an image or<br />Click to Change Photo</b>
-          </template>
-          <template is="dom-if" if="[[_notEditableAndNoAssets]]">
-            <b>No Photo</b>
+            <b class="instruction-text">Drop an image or<br />Click to Change Photo</b>
           </template>
 
           <div class="bb-uploader-preview">
             <div class="bb-uploader-preview-image">
               <template is="dom-if" if="[[_preview]]">
-                <img src$="[[_preview]]" alt="Image preview" height="175" />
+                <div id="mediaPreviewButtons" class="bb-uploader-preview-buttons">
+                  <paper-button class="bb-confirm-button" on-tap="_confirmPreview" icon="check">Confirm</paper-button>
+                  <paper-button class="bb-reject-button" on-tap="_rejectPreview" icon="favorite">Reject</paper-button>
+                </div><!-- end div.bb-uploader-preview-buttons -->
+                <img src$="[[_preview]]" alt="Image preview" class="bb-media-preview" height="175" />
               </template>
             </div><!-- end div.bb-uploader-preview -->
-            <div id="mediaPreviewButtons" class="bb-uploader-preview-buttons hidden">
-              <iron-label>Confirm<paper-icon-button class="bb-confirm-button" on-tap="_confirmPreview" icon="check"></paper-icon-button></iron-label>
-              <iron-label>Reject<paper-icon-button class="bb-reject-button" on-tap="_rejectPreview" icon="favorite"></paper-icon-button></iron-label>
-            </div><!-- end div.bb-uploader-preview-buttons -->
-            <div id="mediaProgressContainer" class="bb-uploader-progress hidden">
+            <div id="mediaProgressContainer" class="bb-uploader-progress">
               <paper-progress id="mediaProgress"></paper-progress>
             </div><!-- end div.bb-uploader-progress -->
           </div>
         </div><!-- end div.bb-uploader -->
         <template is="dom-if" if="[[_src]]">
           <div class="bb-media">
-            <img alt="[[alt]]" src="[[_src]]" class="bb-media-item" height="175" />
+            <img alt="[[alt]]" src="[[_src]]" class="bb-media-item" height="175" hidden$="[[_preview]]" />
           </div><!-- end div.bb-media -->
         </template>
       </div><!-- end div.bb-media-box-content -->
