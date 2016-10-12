@@ -323,25 +323,28 @@
        * new asset due to be uploaded and attached.
        */
       _computeAssetName: function(prefix, resource) {
-        var extension = resource.file.name.split(".")[1],
+        var extension = resource ? resource.file.name.split(".")[1] : null,
             debug = window["__debug"] || this["__debug"] || false,
             urlPrefix = (prefix !== null && prefix !== undefined) ? prefix : "",
             assetName;
-        function s4() {
-          return Math.floor((1 + Math.random()) * 0x10000)
-            .toString(16)
-            .substring(1);
-        }
+        if (extension) {
+          function s4() {
+            return Math.floor((1 + Math.random()) * 0x10000)
+              .toString(16)
+              .substring(1);
+          }
 
-        assetName = [s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-          s4() + '-' + s4() + s4() + s4(), extension].join(".");
-        if (urlPrefix.length > 0) {
-          assetName = [urlPrefix, assetName].join("/");
+          assetName = [s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+            s4() + '-' + s4() + s4() + s4(), extension].join(".");
+          if (urlPrefix.length > 0) {
+            assetName = [urlPrefix, assetName].join("/");
+          }
+          if (debug) {
+            console.info("Provisioning asset at name:", assetName);
+          }
+          return assetName;
         }
-        if (debug) {
-          console.info("Provisioning asset at name:", assetName);
-        }
-        return assetName;
+        return null;
       },
 
       /**
@@ -474,7 +477,6 @@
             file: file,
             reader: reader
           });
-          Polymer.dom(that.$.mediaPreviewButtons).classList.remove("hidden");
         });
       },
 
@@ -516,8 +518,6 @@
             assetName = this.get("_newAssetName"),
             fileObj = this.get("_file"),
             context;
-        Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
-        Polymer.dom.flush();
         e.preventDefault();
         e.stopPropagation();
 
@@ -542,10 +542,6 @@
        */
       _rejectPreview: function(e) {
         var debug = window["__debug"] || this["__debug"] || false;
-        Polymer.dom(this.$.mediaPreviewButtons).classList.add("hidden");
-        Polymer.dom(this.$.dropMessage).classList.add("hidden");
-        Polymer.dom(this.$.normalMessage).classList.remove("hidden");
-        Polymer.dom.flush();
         e.preventDefault();
         e.stopPropagation();
         if (debug)
