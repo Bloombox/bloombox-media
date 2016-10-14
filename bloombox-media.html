@@ -582,6 +582,23 @@
       },
 
       /**
+       * UI responder function that clears existing media assets.
+       */
+      _clearAsset: function(e) {
+        var debug = window["__debug"] || this["__debug"] || false;
+        e.preventDefault();
+        e.stopPropagation();
+        if (debug)
+          console.log("Clearing current media asset.", e);
+        this._set_file(null);
+        if (this.href)
+          this.href = null;
+        if (this.asset)
+          this.asset = null;
+        this.fire("asset-clear", this);
+      },
+
+      /**
        * Set the current upload progress state. Usually dispatched from a parent
        * context that is managing the storage upload process.
        */
