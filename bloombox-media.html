@@ -336,7 +336,7 @@
       _buildAssetURL: function(partner, asset, scheme) {
         // select an environment
         var debug = window["__debug"] || this["__debug"] || false,
-            environment = this.get("environment") || "sandbox",
+            environment = this.get("environment") || bloom.app.environment,
             prefix = environment === "sandbox" ? "sandbox/" + BloomboxMediaConfig.version
                            : BloomboxMediaConfig.version,
             targetScheme = scheme !== undefined ? scheme : "https",
