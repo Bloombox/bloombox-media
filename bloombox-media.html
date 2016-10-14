@@ -113,13 +113,20 @@
         top: 0;
         left: 0;
         right: 0;
-        background: #777;
         opacity: 0.8;
         color: white;
         height: 45px;
         z-index: 1000;
         line-height: 15px;
         padding-top: 15px;
+        text-align: center;
+        text-transform: uppercase;
+        background: #777;
+      }
+
+      :host .instruction-text.no-media {
+        font-size: 80%;
+        background: transparent;
       }
 
       :host .bb-uploader-progress {
@@ -128,6 +135,22 @@
         right: 0;
         bottom: 0;
       }
+
+      :host .bb-clear-media {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 5px;
+        text-align: center;
+        font-size: 80%;
+      }
+
+      :host .bb-clear-media paper-button.bb-clear-button {
+        color: #333;
+        background: orange;
+        opacity: 0.85;
+        --paper-button-ink-color: red;
+      }
     </style>
 
     <div class="bb-media-box">
@@ -135,7 +158,10 @@
         <input id="fileSelect" type="file" name="files[]" />
       </div><!-- end div.bb-media-file-select -->
       <div id="mediaContent" class="bb-media-box-content">
-        <div id="uploader" class="bb-uploader">
+        <template is="dom-if" if="[[_notEditableAndNoAssets]]">
+          <b class="instruction-text no-media">No Media</b>
+        </template>
+        <div id="uploader" class="bb-uploader" hidden$="[[!editable]]">
           <template is="dom-if" if="[[editable]]">
             <b class="instruction-text">Drop an image or<br />Click to Change Photo</b>
           </template>
@@ -151,7 +177,7 @@
               </template>
             </div><!-- end div.bb-uploader-preview -->
             <div id="mediaProgressContainer" class="bb-uploader-progress">
-              <paper-progress id="mediaProgress"></paper-progress>
+              <paper-progress id="mediaProgress" hidden></paper-progress>
             </div><!-- end div.bb-uploader-progress -->
           </div>
         </div><!-- end div.bb-uploader -->
@@ -159,6 +185,11 @@
           <div class="bb-media">
             <img alt="[[alt]]" src="[[_src]]" class="bb-media-item" height="175" hidden$="[[_preview]]" />
           </div><!-- end div.bb-media -->
+          <template is="dom-if" if="[[editable]]" strip-whitespace>
+            <div class="bb-clear-media">
+              <paper-button class="bb-clear-button" on-tap="_clearAsset" icon="delete">Remove Image</paper-button>
+            </div><!-- end div.bb-clear-media -->
+          </template>
         </template>
       </div><!-- end div.bb-media-box-content -->
     </div><!-- end div.bb-media-box -->
