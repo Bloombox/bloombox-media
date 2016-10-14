@@ -26,10 +26,11 @@
 
       :host .bb-media-box {
         background: #DDD;
-        height: 200px;
-        width: 200px;
+        height: var(--bloombox-media-height, 200px);
+        width: var(--bloombox-media-width, 200px);
         border-radius: 10px;
         display: flex;
+        overflow: hidden;
         align-items: center;
         justify-content: center;
       }
@@ -41,12 +42,15 @@
       :host .bb-media-preview {
         z-index: 999;
         opacity: 1;
+        max-width: 95%;
+        max-height: 95%;
       }
 
       :host .bb-media-box-content {
         background: #888;
-        width: 175px;
-        height: 175px;
+        border-radius: 10px;
+        width: var(--bloombox-media-width, 175px);
+        height: var(--bloombox-media-height, 175px);
         position: relative;
         border: 1px solid #888;
         overflow: hidden;
@@ -61,6 +65,11 @@
         bottom: 0;
         right: 0;
         left: 0;
+        border-radius: 10px;
+        overflow: hidden;
+        max-height: 100%;
+        background-color: white;
+        margin-bottom: 1px;
       }
 
       :host[disabled] .bb-media:hover, :host[disabled] .bb-uploader {
@@ -92,6 +101,10 @@
         text-align: center;
         padding-left: 15px;
         z-index: 1000;
+      }
+
+      :host .bb-media-item {
+        border-radius: 0;
       }
 
       :host .bb-uploader-preview-buttons iron-label {
@@ -173,7 +186,7 @@
                   <paper-button class="bb-confirm-button" on-tap="_confirmPreview" icon="check">Confirm</paper-button>
                   <paper-button class="bb-reject-button" on-tap="_rejectPreview" icon="favorite">Reject</paper-button>
                 </div><!-- end div.bb-uploader-preview-buttons -->
-                <img src$="[[_preview]]" alt="Image preview" class="bb-media-preview" height="175" />
+                <img src$="[[_preview]]" alt="Image preview" class="bb-media-preview" />
               </template>
             </div><!-- end div.bb-uploader-preview -->
             <div id="mediaProgressContainer" class="bb-uploader-progress">
