@@ -247,7 +247,7 @@
          */
         _notEditableAndNoAssets: {
           type: Boolean,
-          computed: '_computeNotEditableAndNoAssets(editable, asset, href)'
+          computed: '_computeNotEditableAndNoAssets(editable, disabled, asset, href)'
         },
 
         /**
@@ -382,9 +382,10 @@
        * Helper function that computes state for non-editable widgets
        * that have no assets.
        */
-      _computeNotEditableAndNoAssets: function(editable, asset, href) {
-        return (editable != true && !((typeof asset === "string" && asset.length > 1) ||
-                                      (typeof href === "string" && href.length > 1)));
+      _computeNotEditableAndNoAssets: function(editable, disabled, asset, href) {
+        var hasAsset = (typeof asset === "string" && asset.length > 1) ||
+                       (typeof href === "string" && href.length > 1);
+        return (editable != true && !hasAsset && disabled);
       },
 
       /**
