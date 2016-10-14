@@ -27,8 +27,9 @@
       :host .bb-media-box {
         background: #DDD;
         height: var(--bloombox-media-height, 200px);
-        width: var(--bloombox-media-width, 200px);
+        width: var(--bloombox-media-width, 240px);
         border-radius: 10px;
+        border: 1px solid #888;
         display: flex;
         overflow: hidden;
         align-items: center;
@@ -42,17 +43,16 @@
       :host .bb-media-preview {
         z-index: 999;
         opacity: 1;
-        max-width: 95%;
-        max-height: 95%;
+        max-width: var(--bloombox-media-max-width, inherit);
+        max-height: var(--bloombox-media-max-height, inherit);
       }
 
       :host .bb-media-box-content {
         background: #888;
         border-radius: 10px;
-        width: var(--bloombox-media-width, 175px);
-        height: var(--bloombox-media-height, 175px);
+        width: var(--bloombox-media-width, 240px);
+        height: var(--bloombox-media-height, 200px);
         position: relative;
-        border: 1px solid #888;
         overflow: hidden;
       }
 
@@ -65,10 +65,10 @@
         bottom: 0;
         right: 0;
         left: 0;
-        border-radius: 10px;
         overflow: hidden;
         max-height: 100%;
-        background-color: white;
+        border-radius: 10px;
+        background-color: var(--bloombox-media-background-color, transparent);
         margin-bottom: 1px;
       }
 
@@ -88,6 +88,7 @@
         left: 0;
         cursor: pointer;
         font-size: 80%;
+        border-radius: 10px;
         text-transform: uppercase;
         text-align: center;
       }
@@ -105,6 +106,8 @@
 
       :host .bb-media-item {
         border-radius: 0;
+        max-width: var(--bloombox-media-max-width, inherit);
+        max-height: var(--bloombox-media-max-height, inherit);
       }
 
       :host .bb-uploader-preview-buttons iron-label {
@@ -123,7 +126,7 @@
 
       :host .instruction-text {
         position: absolute;
-        top: 0;
+        top: 0px;
         left: 0;
         right: 0;
         opacity: 0.8;
@@ -132,9 +135,12 @@
         z-index: 1000;
         line-height: 15px;
         padding-top: 15px;
-        text-align: center;
+        padding-left: 10%;
+        text-align: left;
         text-transform: uppercase;
         background: #777;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
       }
 
       :host .instruction-text.no-media {
@@ -147,6 +153,10 @@
         left: 0;
         right: 0;
         bottom: 0;
+      }
+
+      :host .bb-uploader-progress paper-progress {
+        width: 100%;
       }
 
       :host .bb-clear-media {
@@ -164,6 +174,16 @@
         opacity: 0.85;
         --paper-button-ink-color: red;
       }
+
+      :host .bb-media-box:hover .text-on-hover,
+      :host .bb-media-box:hover .button-on-hover {
+        visibility: visible !important;
+      }
+
+      :host .bb-media-box .text-on-hover,
+      :host .bb-media-box .button-on-hover {
+        visibility: hidden;
+      }
     </style>
 
     <div class="bb-media-box">
@@ -176,7 +196,7 @@
         </template>
         <div id="uploader" class="bb-uploader" hidden$="[[!editable]]">
           <template is="dom-if" if="[[editable]]">
-            <b class="instruction-text">Drop an image or<br />Click to Change Photo</b>
+            <b class="instruction-text text-on-hover">Drop an image or<br />Click to Change Photo</b>
           </template>
 
           <div class="bb-uploader-preview">
@@ -196,11 +216,11 @@
         </div><!-- end div.bb-uploader -->
         <template is="dom-if" if="[[_src]]">
           <div class="bb-media">
-            <img alt="[[alt]]" src="[[_src]]" class="bb-media-item" height="175" hidden$="[[_preview]]" />
+            <img alt="[[alt]]" src="[[_src]]" class="bb-media-item" hidden$="[[_preview]]" />
           </div><!-- end div.bb-media -->
           <template is="dom-if" if="[[editable]]" strip-whitespace>
             <div class="bb-clear-media">
-              <paper-button class="bb-clear-button" on-tap="_clearAsset" icon="delete">Remove Image</paper-button>
+              <paper-button class="bb-clear-button button-on-hover" on-tap="_clearAsset" icon="delete">Remove Image</paper-button>
             </div><!-- end div.bb-clear-media -->
           </template>
         </template>
