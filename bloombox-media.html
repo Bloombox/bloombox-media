@@ -604,6 +604,7 @@
        */
       setProgress: function(amount) {
         var that = this;
+        Polymer.dom(this.$.mediaProgress).removeAttribute("hidden");
         Polymer.dom(this.$.mediaProgressContainer).classList.remove("hidden");
         this.$.mediaProgress.value = amount;
         Polymer.dom.flush();
@@ -641,10 +642,12 @@
        */
       adoptNewAsset: function() {
         var newAsset = this.get("_newAssetName");
-        if (newAsset !== null && newAsset !== undefined)
+        if (newAsset !== null && newAsset !== undefined) {
           this.set("asset", newAsset);
-        else
+          this._set_file(null);
+        } else {
           console.warn("Unable to adopt new asset because name was found to be undefined or null.");
+        }
       },
 
       /**
