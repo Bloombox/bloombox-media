@@ -441,7 +441,8 @@
 
         if (debug)
           console.log("Checking file type...", file);
-        if (!file.type.match('image.*')) {
+        if ((!["png", "PNG", "jpeg", "JPEG", "jpg", "gif"].indexOf(file.name.split(".")[1]))
+             || !file.type.match('image.*')) {
           console.error("Item was found not to be a supported media type:", file);
           alert("Only image files are supported as media.");
           return false;
