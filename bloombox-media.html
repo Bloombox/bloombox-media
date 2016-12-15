@@ -387,11 +387,12 @@
        * new asset due to be uploaded and attached.
        */
       _computeAssetName: function(prefix, resource) {
-        var extension = resource ? resource.file.name.split(".")[1] : null,
+        var resourceComponents = resource ? resource.file.name.split(".") : null,
+            extension = resourceComponents ? resourceComponents[resourceComponents.length - 1] : null,
             debug = window["__debug"] || this["__debug"] || false,
             urlPrefix = (prefix !== null && prefix !== undefined) ? prefix : "",
             assetName;
-        if (extension) {
+        if (extension !== null) {
           function s4() {
             return Math.floor((1 + Math.random()) * 0x10000)
               .toString(16)
@@ -437,12 +438,12 @@
        * if the content type matches `image.*`.
        */
       _checkFileType: function(file) {
-        var debug = window["__debug"] || this["__debug"] || false;
+        var debug = window["__debug"] || this["__debug"] || false,
+            fileExtensionMatches = !["png", "PNG", "jpeg", "JPEG", "jpg", "gif"].indexOf(file.name.split(".")[1]);
 
         if (debug)
           console.log("Checking file type...", file);
-        if ((!["png", "PNG", "jpeg", "JPEG", "jpg", "gif"].indexOf(file.name.split(".")[1]))
-             || !file.type.match('image.*')) {
+        if (fileExtensionMatches || !file.type.match('image.*')) {
           console.error("Item was found not to be a supported media type:", file);
           alert("Only image files are supported as media.");
           return false;
