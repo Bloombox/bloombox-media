@@ -368,6 +368,8 @@
        */
       _buildAssetURL: function(partner, asset, scheme) {
         // select an environment
+        if (asset.indexOf("https://") !== -1)
+          return asset;
         var debug = window["__debug"] || this["__debug"] || false,
             bloom = window["bloom"] || null,
             environment = this.get("environment") || (bloom ? bloom.app.environment : "sandbox"),
