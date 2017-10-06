@@ -442,7 +442,7 @@
        */
       _checkFileType: function(file) {
         var debug = window["__debug"] || this["__debug"] || false,
-            fileExtensionMatches = !["png", "PNG", "jpeg", "JPEG", "jpg", "gif"].indexOf(file.name.split(".")[1]);
+            fileExtensionMatches = !((["png", "jpeg", "jpg", "gif"].indexOf(file.name.split(".")[1].toLowerCase())) !== -1);
 
         if (debug)
           console.log("Checking file type...", file);
